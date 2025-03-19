@@ -1,6 +1,15 @@
 import { CalendarIcon, Eye, Lock, Mail } from "lucide-react"
+import { useInputChange } from "@hooks/inputs";
 
 const Login = () => {
+
+
+    const { inputs, handleChange } = useInputChange({
+        email: { required: true, validation: "email" },
+        password: { required: true },
+    });
+
+    
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col items-center justify-center p-4 md:p-8">
             {/* Decorative elements */}
@@ -39,10 +48,14 @@ const Login = () => {
                                         name="email"
                                         type="email"
                                         autoComplete="email"
+                                        onChange={handleChange}
+                                        value={inputs.email.value}
                                         className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         placeholder="john.doe@example.com"
                                     />
+                                   
                                 </div>
+                                <p className="text-red-500 text-sm italic">{inputs.email.error}</p>
                             </div>
 
                             {/* Password field */}
@@ -63,6 +76,8 @@ const Login = () => {
                                         id="password"
                                         name="password"
                                         type="password"
+                                        onChange={handleChange}
+                                        value={inputs.password.value}
                                         autoComplete="current-password"
                                         className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         placeholder="••••••••"
@@ -73,6 +88,7 @@ const Login = () => {
                                         </button>
                                     </div>
                                 </div>
+                                <p className="text-red-500 text-sm italic">{inputs.password.error}</p>
                             </div>
 
                             {/* Remember me checkbox */}
@@ -161,14 +177,14 @@ const Login = () => {
                     </div>
 
                     {/* Sign up section */}
-                    <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex items-center justify-center">
+                    {/* <div className="px-8 py-5 bg-gray-50 border-t border-gray-100 flex items-center justify-center">
                         <p className="text-sm text-gray-600">
                             Don't have an account?{" "}
                             <a href="#" className="font-medium text-indigo-600 hover:text-indigo-500">
                                 Sign up
                             </a>
                         </p>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Footer */}
