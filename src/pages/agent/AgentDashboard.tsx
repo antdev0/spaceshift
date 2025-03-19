@@ -42,8 +42,17 @@ const AgentDashboard = () => {
         }
     }, [])
 
-    // Sample data for desk assignments with work type (WFH or onsite)
-    const scheduleData = {
+    type ScheduleType = "wfh" | "onsite";
+
+    interface Schedule {
+        type: ScheduleType;
+        area?: string;
+        desk?: string;
+        floor?: string;
+        team?: string;
+    }
+
+    const scheduleData: Record<string, Schedule> = {
         "2025-03-15": { type: "wfh" },
         "2025-03-16": { type: "onsite", area: "Technical Support", desk: "TS-18", floor: "4th Floor", team: "Alpha" },
         "2025-03-17": { type: "onsite", area: "Sales Department", desk: "SL-07", floor: "2nd Floor", team: "Omega" },
@@ -51,7 +60,7 @@ const AgentDashboard = () => {
         "2025-03-19": { type: "onsite", area: "Customer Experience", desk: "CE-22", floor: "3rd Floor", team: "Delta" },
         "2025-03-20": { type: "onsite", area: "Product Support", desk: "PS-11", floor: "5th Floor", team: "Beta" },
         "2025-03-21": { type: "wfh" },
-    }
+    };
 
     // Sample upcoming schedules
     const upcomingSchedules = [
@@ -164,9 +173,9 @@ const AgentDashboard = () => {
                         )}
                     </div>
 
-                    {hasSchedule && scheduleType === "onsite" && (
+                    {hasSchedule && scheduleType === "onsite" && scheduleData[dateKey]?.area && (
                         <div className="mt-2 text-xs text-gray-600 font-medium truncate">
-                            {(scheduleData[dateKey as keyof typeof scheduleData] as any).area}
+                            {scheduleData[dateKey]?.area}
                         </div>
                     )}
 
@@ -201,6 +210,17 @@ const AgentDashboard = () => {
         "November",
         "December",
     ]
+
+    const [showDropdown, setShowDropdown] = useState(false);
+
+    const handleSelectView = (view: "month" | "week") => {
+        setCurrentView(view);
+        setShowDropdown(false);
+    };
+
+    const selectedSchedule = selectedDate
+    ? scheduleData[formatDateKey(selectedDate)] as Schedule | undefined
+    : undefined;
 
 
     return (
@@ -426,10 +446,30 @@ const AgentDashboard = () => {
                                             <div className="h-6 w-px bg-gray-200 mx-2"></div>
 
                                             <div className="relative">
-                                                <button className="flex items-center gap-1 text-sm font-medium bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg">
+                                                <button
+                                                    onClick={() => setShowDropdown((prev) => !prev)}
+                                                    className="flex items-center gap-1 text-sm font-medium bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
+                                                >
                                                     <span>{currentView === "month" ? "Month" : "Week"}</span>
                                                     <ChevronDown size={16} />
                                                 </button>
+
+                                                {showDropdown && (
+                                                    <div className="absolute mt-2 w-32 bg-white shadow-md rounded-lg">
+                                                        <button
+                                                            onClick={() => handleSelectView("month")}
+                                                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                                        >
+                                                            Month
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleSelectView("week")}
+                                                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                                                        >
+                                                            Week
+                                                        </button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -512,9 +552,6 @@ const AgentDashboard = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <button className="text-gray-400 hover:text-gray-600">
-                                                    <MessageSquare size={18} />
-                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -725,7 +762,7 @@ const AgentDashboard = () => {
                                                     <div>
                                                         <p className="text-sm text-gray-500">Area</p>
                                                         <p className="font-medium">
-                                                            {(scheduleData[formatDateKey(selectedDate) as keyof typeof scheduleData] as any).area}
+                                                            {selectedSchedule?.area && <p className="font-medium">{selectedSchedule.area}</p>}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -735,7 +772,7 @@ const AgentDashboard = () => {
                                                     <div>
                                                         <p className="text-sm text-gray-500">Desk</p>
                                                         <p className="font-medium">
-                                                            {(scheduleData[formatDateKey(selectedDate) as keyof typeof scheduleData] as any).desk}
+                                                            {selectedSchedule?.desk && <p className="font-medium">{selectedSchedule.desk}</p>}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -745,7 +782,7 @@ const AgentDashboard = () => {
                                                     <div>
                                                         <p className="text-sm text-gray-500">Location</p>
                                                         <p className="font-medium">
-                                                            {(scheduleData[formatDateKey(selectedDate) as keyof typeof scheduleData] as any).floor}
+                                                            {selectedSchedule?.floor && <p className="font-medium">{selectedSchedule.floor}</p>}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -755,7 +792,7 @@ const AgentDashboard = () => {
                                                     <div>
                                                         <p className="text-sm text-gray-500">Team</p>
                                                         <p className="font-medium">
-                                                            {(scheduleData[formatDateKey(selectedDate) as keyof typeof scheduleData] as any).team}
+                                                            {selectedSchedule?.team && <p className="font-medium">{selectedSchedule.team}</p>}
                                                         </p>
                                                     </div>
                                                 </div>
