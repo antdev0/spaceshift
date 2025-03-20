@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from "react"
+import { useAuthContext } from "@hooks/contexts/useAuthContext"
 import {
     ChevronLeft,
     ChevronRight,
@@ -8,7 +9,7 @@ import {
     MapPin,
     CalendarIcon,
     X,
-    ChevronDown,
+    // ChevronDown,
     User,
     Bell,
     LogOut,
@@ -17,19 +18,43 @@ import {
     Users,
     Calendar,
     MessageSquare,
-    Search,
+    // Search,
 } from "lucide-react"
 
+import { api } from "@services/api"
 
+
+interface StatisticsProps {
+    totalOnsite: number;
+    totalWfh: number;
+    totalTeam: number;
+    totalWorkDays: number;
+    monthlyStatsWfh: number;
+    monthlyStatsOnsite: number;
+}
 
 const AgentDashboard = () => {
+    const { user, loading } = useAuthContext();
+
+
 
     const [currentDate, setCurrentDate] = useState(new Date())
     const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [showModal, setShowModal] = useState(false)
-    const [currentView, setCurrentView] = useState<"month" | "week">("month")
+    // const [currentView, setCurrentView] = useState<"month" | "week">("month")
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [currentTime, setCurrentTime] = useState(new Date())
+    const [scheduleData, setScheduleData] = useState<Record<string, Schedule>>({})
+    const [fetchLoading, setFetchLoading] = useState(false)
+    const [statistics, setStatistics] = useState<StatisticsProps>({
+        totalOnsite: 0,
+        totalWfh: 0,
+        totalTeam: 0,
+        totalWorkDays: 0,
+        monthlyStatsWfh: 0,
+        monthlyStatsOnsite: 0,
+    })
+
 
     // Update current time every minute
     useEffect(() => {
@@ -42,6 +67,42 @@ const AgentDashboard = () => {
         }
     }, [])
 
+    useEffect(() => {
+        const monthNumber = currentDate.getMonth() + 1;
+        const year = currentDate.getFullYear();
+        const fetchData = async () => {
+            try {
+                setFetchLoading(true);
+                const response = await api.get(`/my-schedule/${user?.id}/${monthNumber}/${year}`);
+
+                setStatistics({
+                    totalOnsite: response.data.data.total_onsite,
+                    totalWfh: response.data.data.total_wfh,
+                    totalTeam: response.data.data.total_users_in_team,
+                    totalWorkDays: response.data.data.total_working_days,
+                    monthlyStatsWfh: isNaN(Number(((response.data.data.total_wfh / response.data.data.total_working_days) * 100).toFixed(2)))
+                        ? 0
+                        : Number(((response.data.data.total_wfh / response.data.data.total_working_days) * 100).toFixed(2)),
+
+                    monthlyStatsOnsite: isNaN(Number(((response.data.data.total_onsite / response.data.data.total_working_days) * 100).toFixed(2)))
+                        ? 0
+                        : Number(((response.data.data.total_onsite / response.data.data.total_working_days) * 100).toFixed(2))
+                });
+                setScheduleData(response.data.data.schedule);
+            } catch (error) {
+                console.error("Error fetching data", error);
+            } finally {
+                setFetchLoading(false);
+            }
+        }
+        fetchData();
+
+    }, [user, currentDate]);
+
+
+
+
+
     type ScheduleType = "wfh" | "onsite";
 
     interface Schedule {
@@ -52,38 +113,27 @@ const AgentDashboard = () => {
         team?: string;
     }
 
-    const scheduleData: Record<string, Schedule> = {
-        "2025-03-15": { type: "wfh" },
-        "2025-03-16": { type: "onsite", area: "Technical Support", desk: "TS-18", floor: "4th Floor", team: "Alpha" },
-        "2025-03-17": { type: "onsite", area: "Sales Department", desk: "SL-07", floor: "2nd Floor", team: "Omega" },
-        "2025-03-18": { type: "wfh" },
-        "2025-03-19": { type: "onsite", area: "Customer Experience", desk: "CE-22", floor: "3rd Floor", team: "Delta" },
-        "2025-03-20": { type: "onsite", area: "Product Support", desk: "PS-11", floor: "5th Floor", team: "Beta" },
-        "2025-03-21": { type: "wfh" },
-    };
+    // const upcomingSchedules = [{}
+    //     // { date: "Mar 19", day: "Wed", type: "onsite", area: "Customer Experience", desk: "CE-22" },
+    //     // { date: "Mar 20", day: "Thu", type: "onsite", area: "Product Support", desk: "PS-11" },
+    //     // { date: "Mar 21", day: "Fri", type: "wfh" },
+    //     // { date: "Mar 24", day: "Mon", type: "onsite", area: "Technical Support", desk: "TS-05" },
+    // ]
 
-    // Sample upcoming schedules
-    const upcomingSchedules = [
-        { date: "Mar 19", day: "Wed", type: "onsite", area: "Customer Experience", desk: "CE-22" },
-        { date: "Mar 20", day: "Thu", type: "onsite", area: "Product Support", desk: "PS-11" },
-        { date: "Mar 21", day: "Fri", type: "wfh" },
-        { date: "Mar 24", day: "Mon", type: "onsite", area: "Technical Support", desk: "TS-05" },
-    ]
+    // // Sample team members
+    // const teamMembers = [{}
+    //     // { name: "Alex Johnson", status: "onsite", area: "Technical Support" },
+    //     // { name: "Maria Garcia", status: "wfh" },
+    //     // { name: "James Smith", status: "onsite", area: "Customer Experience" },
+    //     // { name: "Sarah Lee", status: "wfh" },
+    // ]
 
-    // Sample team members
-    const teamMembers = [
-        { name: "Alex Johnson", status: "onsite", area: "Technical Support" },
-        { name: "Maria Garcia", status: "wfh" },
-        { name: "James Smith", status: "onsite", area: "Customer Experience" },
-        { name: "Sarah Lee", status: "wfh" },
-    ]
-
-    // Sample notifications
-    const notifications = [
-        { message: "Schedule changed for March 24", time: "2 hours ago" },
-        { message: "New team assignment for next week", time: "Yesterday" },
-        { message: "Office closure on March 31", time: "2 days ago" },
-    ]
+    // // Sample notifications
+    // const notifications = [{}
+    //     // { message: "Schedule changed for March 24", time: "2 hours ago" },
+    //     // { message: "New team assignment for next week", time: "Yesterday" },
+    //     // { message: "Office closure on March 31", time: "2 days ago" },
+    // ]
 
     const getDaysInMonth = (year: number, month: number) => {
         return new Date(year, month + 1, 0).getDate()
@@ -211,18 +261,18 @@ const AgentDashboard = () => {
         "December",
     ]
 
-    const [showDropdown, setShowDropdown] = useState(false);
+    // const [showDropdown, setShowDropdown] = useState(false);
 
-    const handleSelectView = (view: "month" | "week") => {
-        setCurrentView(view);
-        setShowDropdown(false);
-    };
+    // const handleSelectView = (view: "month" | "week") => {
+    //     setCurrentView(view);
+    //     setShowDropdown(false);
+    // };
 
     const selectedSchedule = selectedDate
-    ? scheduleData[formatDateKey(selectedDate)] as Schedule | undefined
-    : undefined;
+        ? scheduleData[formatDateKey(selectedDate)] as Schedule | undefined
+        : undefined;
 
-
+    if (loading) return <p>Loading...</p>;
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
             {/* Navbar */}
@@ -278,7 +328,7 @@ const AgentDashboard = () => {
                                 <div className="h-8 w-8 rounded-full bg-indigo-100 flex items-center justify-center">
                                     <User size={16} className="text-indigo-600" />
                                 </div>
-                                <span className="text-sm font-medium text-gray-700">John Doe</span>
+                                <span className="text-sm font-medium text-gray-700">{user?.first_name} {user?.last_name}</span>
                             </div>
 
                             <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
@@ -369,61 +419,112 @@ const AgentDashboard = () => {
             <div className="pt-16 p-4 md:p-8">
                 <div className="max-w-7xl mx-auto">
                     {/* Dashboard header */}
-                    <div className="mb-8">
-                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Welcome back, John</h1>
+                    <div className="mb-8 mt-16">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Welcome back, {user?.first_name}</h1>
                         <p className="text-gray-500">Here's your schedule for March 2025</p>
                     </div>
 
                     {/* Quick stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                    <Calendar size={20} className="text-indigo-600" />
+                    {
+                        fetchLoading ? (
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                                {/* Skeleton for the "This Month" card */}
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 animate-pulse">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-indigo-100"></div>
+                                        <div className="flex flex-col">
+                                            <div className="w-24 h-4 bg-gray-200 mb-2"></div>
+                                            <div className="w-32 h-6 bg-gray-200"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">This Month</p>
-                                    <p className="text-xl font-semibold">22 Work Days</p>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
-                                    <Home size={20} className="text-teal-600" />
+                                {/* Skeleton for the "Work from Home" card */}
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 animate-pulse">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-teal-100"></div>
+                                        <div className="flex flex-col">
+                                            <div className="w-24 h-4 bg-gray-200 mb-2"></div>
+                                            <div className="w-32 h-6 bg-gray-200"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Work from Home</p>
-                                    <p className="text-xl font-semibold">12 Days</p>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center">
-                                    <Building size={20} className="text-violet-600" />
+                                {/* Skeleton for the "Onsite Work" card */}
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 animate-pulse">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-violet-100"></div>
+                                        <div className="flex flex-col">
+                                            <div className="w-24 h-4 bg-gray-200 mb-2"></div>
+                                            <div className="w-32 h-6 bg-gray-200"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Onsite Work</p>
-                                    <p className="text-xl font-semibold">10 Days</p>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-                                    <Users size={20} className="text-amber-600" />
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Team Members</p>
-                                    <p className="text-xl font-semibold">8 People</p>
+                                {/* Skeleton for the "Team Members" card */}
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100 animate-pulse">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-amber-100"></div>
+                                        <div className="flex flex-col">
+                                            <div className="w-24 h-4 bg-gray-200 mb-2"></div>
+                                            <div className="w-32 h-6 bg-gray-200"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <Calendar size={20} className="text-indigo-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">This Month</p>
+                                            <p className="text-xl font-semibold">{statistics?.totalWorkDays} Work Days</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-teal-100 flex items-center justify-center">
+                                            <Home size={20} className="text-teal-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Work from Home</p>
+                                            <p className="text-xl font-semibold">{statistics?.totalWfh} Days</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center">
+                                            <Building size={20} className="text-violet-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Onsite Work</p>
+                                            <p className="text-xl font-semibold">{statistics?.totalOnsite} Days</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                                            <Users size={20} className="text-amber-600" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-gray-500">Team Members</p>
+                                            <p className="text-xl font-semibold">{statistics?.totalTeam} People</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    }
+
 
                     {/* Main calendar */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -441,35 +542,6 @@ const AgentDashboard = () => {
                                             <div className="flex items-center gap-2 text-sm">
                                                 <div className="w-3 h-3 rounded-full bg-violet-500"></div>
                                                 <span>Onsite</span>
-                                            </div>
-
-                                            <div className="h-6 w-px bg-gray-200 mx-2"></div>
-
-                                            <div className="relative">
-                                                <button
-                                                    onClick={() => setShowDropdown((prev) => !prev)}
-                                                    className="flex items-center gap-1 text-sm font-medium bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded-lg"
-                                                >
-                                                    <span>{currentView === "month" ? "Month" : "Week"}</span>
-                                                    <ChevronDown size={16} />
-                                                </button>
-
-                                                {showDropdown && (
-                                                    <div className="absolute mt-2 w-32 bg-white shadow-md rounded-lg">
-                                                        <button
-                                                            onClick={() => handleSelectView("month")}
-                                                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                                        >
-                                                            Month
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleSelectView("week")}
-                                                            className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                                                        >
-                                                            Week
-                                                        </button>
-                                                    </div>
-                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -493,24 +565,47 @@ const AgentDashboard = () => {
                                             </button>
                                         </div>
 
-                                        <button className="text-indigo-500 hover:text-indigo-700 text-sm font-medium">Today</button>
+
                                     </div>
                                 </div>
 
-                                <div className="p-4 md:p-6 bg-white">
-                                    <div className="grid grid-cols-7 gap-3 md:gap-4">
-                                        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
-                                            <div key={day} className="h-10 flex items-center justify-center font-medium text-gray-500">
-                                                {day}
+                                {
+                                    fetchLoading ? (
+                                        <div className="p-4 md:p-6 bg-white">
+                                            <div className="grid grid-cols-7 gap-3 md:gap-4">
+                                                {/* Skeleton for the days of the week */}
+                                                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                                                    <div key={day} className="h-10 flex items-center justify-center font-medium text-gray-500">
+                                                        {day}
+                                                    </div>
+                                                ))}
+                                                {/* Skeleton for the calendar days */}
+                                                {Array.from({ length: 42 }).map((_, index) => (
+                                                    <div key={index} className="h-20 flex items-center justify-center bg-gray-200 animate-pulse">
+                                                        <div className="w-6 h-6 bg-gray-300 rounded-full"></div>
+                                                    </div>
+                                                ))}
                                             </div>
-                                        ))}
-                                        {renderCalendar()}
-                                    </div>
-                                </div>
+                                        </div>
+                                    ) : (
+                                        <div className="p-4 md:p-6 bg-white">
+                                            <div className="grid grid-cols-7 gap-3 md:gap-4">
+                                                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                                                    <div key={day} className="h-10 flex items-center justify-center font-medium text-gray-500">
+                                                        {day}
+                                                    </div>
+                                                ))}
+                                                {renderCalendar()}
+                                            </div>
+                                        </div>
+                                    )
+                                }
+
+
                             </div>
 
                             {/* Team schedule */}
-                            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                            {/* <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
                                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800">Team Schedule</h2>
                                     <button className="text-indigo-500 hover:text-indigo-700 text-sm font-medium">View All</button>
@@ -556,12 +651,12 @@ const AgentDashboard = () => {
                                         ))}
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
 
                         <div className="space-y-6">
                             {/* Upcoming schedule */}
-                            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                            {/* <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
                                 <div className="p-6 border-b border-gray-100">
                                     <h2 className="text-xl font-bold text-gray-800">Upcoming Schedule</h2>
                                 </div>
@@ -601,10 +696,10 @@ const AgentDashboard = () => {
                                         ))}
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Notifications */}
-                            <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
+                            {/* <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
                                 <div className="p-6 border-b border-gray-100 flex justify-between items-center">
                                     <h2 className="text-xl font-bold text-gray-800">Notifications</h2>
                                     <button className="text-indigo-500 hover:text-indigo-700 text-sm font-medium">
@@ -629,7 +724,7 @@ const AgentDashboard = () => {
                                         ))}
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
 
                             {/* Monthly stats */}
                             <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-100">
@@ -642,24 +737,24 @@ const AgentDashboard = () => {
                                         <div>
                                             <div className="flex justify-between items-center mb-1">
                                                 <span className="text-sm font-medium">Work from Home</span>
-                                                <span className="text-sm font-medium">55%</span>
+                                                <span className="text-sm font-medium">{statistics?.monthlyStatsWfh}%</span>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div className="bg-teal-500 h-2 rounded-full" style={{ width: "55%" }}></div>
+                                                <div className="bg-teal-500 h-2 rounded-full" style={{ width: `${statistics?.monthlyStatsWfh}%` }}></div>
                                             </div>
                                         </div>
 
                                         <div>
                                             <div className="flex justify-between items-center mb-1">
                                                 <span className="text-sm font-medium">Onsite Work</span>
-                                                <span className="text-sm font-medium">45%</span>
+                                                <span className="text-sm font-medium">{statistics?.monthlyStatsOnsite}%</span>
                                             </div>
                                             <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div className="bg-violet-500 h-2 rounded-full" style={{ width: "45%" }}></div>
+                                                <div className="bg-violet-500 h-2 rounded-full" style={{ width: `${statistics?.monthlyStatsOnsite}%` }}></div>
                                             </div>
                                         </div>
 
-                                        <div className="pt-4">
+                                        {/* <div className="pt-4">
                                             <h3 className="text-sm font-medium mb-3">Onsite Areas</h3>
                                             <div className="space-y-2">
                                                 <div className="flex justify-between items-center">
@@ -679,13 +774,13 @@ const AgentDashboard = () => {
                                                     <span className="text-xs font-medium">1 day</span>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>
 
                             {/* Quick actions */}
-                            <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg overflow-hidden">
+                            {/* <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl shadow-lg overflow-hidden">
                                 <div className="p-6">
                                     <h2 className="text-xl font-bold text-white mb-4">Quick Actions</h2>
                                     <div className="grid grid-cols-2 gap-3">
@@ -703,7 +798,7 @@ const AgentDashboard = () => {
                                         </button>
                                     </div>
                                 </div>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 </div>

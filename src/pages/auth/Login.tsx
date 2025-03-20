@@ -1,7 +1,11 @@
 import { CalendarIcon, Eye, Lock, Mail } from "lucide-react"
 import { useInputChange } from "@hooks/inputs";
+import { useAuthContext } from "@hooks/contexts/useAuthContext";
+import toast from "react-hot-toast";
 
 const Login = () => {
+
+    const { login, loginLoading } = useAuthContext();
 
 
     const { inputs, handleChange } = useInputChange({
@@ -9,7 +13,31 @@ const Login = () => {
         password: { required: true },
     });
 
-    
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const response = await login(inputs.email.value, inputs.password.value);
+
+        if (!response) {
+            toast.error("Something went wrong, please try again");
+            return;
+        }
+
+        console.log("Login Response:", response); // ✅ Debugging
+
+        if (response.system_role === "admin") {
+            window.location.href = "/admin";
+        } else if (response.system_role === "agent") {
+            window.location.href = "/agent";
+        } else {
+            toast.error("Invalid role received");
+        }
+    };
+
+
+    // console.log(loading)
+
+
+
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex flex-col items-center justify-center p-4 md:p-8">
             {/* Decorative elements */}
@@ -24,7 +52,7 @@ const Login = () => {
                         <CalendarIcon className="h-8 w-8 text-indigo-600" />
                     </div>
                     <h1 className="text-2xl font-bold text-gray-800">SpaceShift</h1>
-                    <p className="text-gray-500 mt-1">BPO Agent Portal</p>
+                    <p className="text-gray-500 mt-1">Workspace Portal</p>
                 </div>
 
                 {/* Login card */}
@@ -33,7 +61,7 @@ const Login = () => {
                         <h2 className="text-2xl font-bold text-gray-800 mb-2">Welcome back</h2>
                         <p className="text-gray-500 mb-6">Please sign in to your account</p>
 
-                        <div className="space-y-5">
+                        <form className="space-y-5" onSubmit={handleSubmit} autoComplete="off">
                             {/* Email field */}
                             <div className="space-y-2">
                                 <label htmlFor="email" className="text-sm font-medium text-gray-700 block">
@@ -47,13 +75,12 @@ const Login = () => {
                                         id="email"
                                         name="email"
                                         type="email"
-                                        autoComplete="email"
                                         onChange={handleChange}
                                         value={inputs.email.value}
                                         className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         placeholder="john.doe@example.com"
                                     />
-                                   
+
                                 </div>
                                 <p className="text-red-500 text-sm italic">{inputs.email.error}</p>
                             </div>
@@ -78,7 +105,6 @@ const Login = () => {
                                         type="password"
                                         onChange={handleChange}
                                         value={inputs.password.value}
-                                        autoComplete="current-password"
                                         className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                                         placeholder="••••••••"
                                     />
@@ -107,13 +133,16 @@ const Login = () => {
                             {/* Sign in button */}
                             <div>
                                 <button
-                                    type="button"
+                                    type="submit"
+                                    disabled={loginLoading}
                                     className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
                                 >
-                                    Sign in
+                                    {
+                                        loginLoading ? "Signing in..." : "Sign in"
+                                    }
                                 </button>
                             </div>
-                        </div>
+                        </form>
 
                         {/* SSO options */}
                         {/* <div className="mt-6">

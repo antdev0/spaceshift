@@ -1,6 +1,8 @@
 import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import AdminLayout from "@layouts/AdminLayout";
+import AgentLayout from "@layouts/AgentLayout";
+import PrivateRoutes from "@layouts/PirvateRoutes";
 const Login = lazy(() => import("@pages/auth/Login"));
 const AgentDashboard = lazy(() => import("@pages/agent/AgentDashboard"));
 
@@ -17,6 +19,11 @@ const router = createBrowserRouter([
         element: <div>Not found</div>,
     },
 
+    {
+        path: "/403",
+        element: <div>Forbidden</div>,
+    },
+
 
 
     {
@@ -26,13 +33,25 @@ const router = createBrowserRouter([
 
     {
         path: "/agent",
-        element: <AgentDashboard />,
+        element:
+            <PrivateRoutes allowedRoles={["agent"]} >
+                <AgentLayout />
+            </PrivateRoutes>,
+        children: [
+            {
+                path: "",
+                element: <AgentDashboard />,
+            },
+        ],
     },
 
 
     {
         path: "/admin",
-        element: <AdminLayout />,
+        element:
+            <PrivateRoutes allowedRoles={["admin"]}>
+                <AdminLayout />
+            </PrivateRoutes>,
         children: [
             {
                 path: "",
