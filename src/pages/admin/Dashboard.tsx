@@ -1,4 +1,4 @@
-import { ArrowUpRight, ArrowDownRight } from "lucide-react"
+// import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 
 
 const Dashboard = () => {
@@ -14,25 +14,22 @@ const Dashboard = () => {
         {
             name: "John Doe",
             email: "john.doe@example.com",
-            status: "Active",
-            location: "Technical Support",
-            type: "Onsite",
+
+            team: "TEAM A",
         },
         {
             name: "Sarah Lee",
             email: "sarah.lee@example.com",
-            status: "Active",
-            location: "Customer Experience",
-            type: "WFH",
+
+            team: "TEAM A",
         },
-        { name: "Mike Johnson", email: "mike.j@example.com", status: "Away", location: "Sales Department", type: "Onsite" },
-        { name: "Emily Chen", email: "emily.c@example.com", status: "Active", location: "Product Support", type: "WFH" },
+        { name: "Mike Johnson", email: "mike.j@example.com", status: "Away", location: "Sales Department", team: "TEAM A" },
+        { name: "Emily Chen", email: "emily.c@example.com", status: "Active", location: "Product Support", team: "TEAM A" },
         {
             name: "Robert Kim",
             email: "robert.k@example.com",
-            status: "Inactive",
-            location: "Technical Support",
-            type: "WFH",
+
+            team: "TEAM A",
         },
     ]
     return (
@@ -52,12 +49,12 @@ const Dashboard = () => {
                                 <div className="flex-shrink-0">
                                     <div
                                         className={`w-12 h-12 rounded-lg flex items-center justify-center ${index % 4 === 0
-                                                ? "bg-indigo-100 text-indigo-600"
-                                                : index % 4 === 1
-                                                    ? "bg-purple-100 text-purple-600"
-                                                    : index % 4 === 2
-                                                        ? "bg-green-100 text-green-600"
-                                                        : "bg-yellow-100 text-yellow-600"
+                                            ? "bg-indigo-100 text-indigo-600"
+                                            : index % 4 === 1
+                                                ? "bg-purple-100 text-purple-600"
+                                                : index % 4 === 2
+                                                    ? "bg-green-100 text-green-600"
+                                                    : "bg-yellow-100 text-yellow-600"
                                             }`}
                                     >
                                         <svg
@@ -109,7 +106,7 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="bg-gray-50 px-5 py-3">
+                        {/* <div className="bg-gray-50 px-5 py-3">
                             <div className="text-sm flex items-center">
                                 {stat.trend === "up" ? (
                                     <ArrowUpRight className="w-4 h-4 text-green-500 mr-1" />
@@ -121,7 +118,7 @@ const Dashboard = () => {
                                 </span>
                                 <span className="text-gray-500 ml-2">from last month</span>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 ))}
             </div>
@@ -146,23 +143,12 @@ const Dashboard = () => {
                                 >
                                     Name
                                 </th>
+
                                 <th
                                     scope="col"
                                     className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                 >
-                                    Status
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                >
-                                    Location
-                                </th>
-                                <th
-                                    scope="col"
-                                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                >
-                                    Type
+                                    Team
                                 </th>
                             </tr>
                         </thead>
@@ -183,7 +169,7 @@ const Dashboard = () => {
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
+                                    {/* <td className="px-6 py-4 whitespace-nowrap">
                                         <span
                                             className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${agent.status === "Active"
                                                     ? "bg-green-100 text-green-800"
@@ -194,15 +180,10 @@ const Dashboard = () => {
                                         >
                                             {agent.status}
                                         </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{agent.location}</td>
+                                    </td> */}
+                                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{agent.location}</td> */}
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <span
-                                            className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${agent.type === "WFH" ? "bg-green-100 text-green-800" : "bg-purple-100 text-purple-800"
-                                                }`}
-                                        >
-                                            {agent.type}
-                                        </span>
+                                        <div className="text-sm font-medium text-gray-900">{agent.team}</div>
                                     </td>
                                 </tr>
                             ))}

@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { Link } from "react-router-dom"
 import { Outlet } from "react-router-dom"
+import { useAuthContext } from "@hooks/contexts/useAuthContext"
 import {
     BarChart3,
     Bell,
     Calendar,
-    ChevronDown,
     Clock,
     Home,
     LogOut,
@@ -21,8 +21,59 @@ import {
 
 const AdminLayout = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false)
+    const [showLogoutModal, setShowLogoutModal] = useState(false)
+    const {logout, logoutLoading} = useAuthContext()
     return (
         <div className="flex h-screen bg-gray-50">
+            {
+                showLogoutModal && (
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+
+                    >
+                        <div
+                            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-300"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Header */}
+                            <div className="p-6 border-b flex justify-between items-center">
+                                <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                                    <LogOut className="h-5 w-5 text-indigo-600" />
+                                    Confirm
+                                </h3>
+                                <button onClick={() => setShowLogoutModal(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Close">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6">
+                                <p className="text-gray-600">Are you sure you want to logout?</p>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowLogoutModal(false)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => logout()}
+                                    disabled={logoutLoading}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    {logoutLoading ? "Logging out..." : "Logout"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
             {/* Mobile sidebar backdrop */}
             {sidebarOpen && (
                 <div
@@ -33,7 +84,7 @@ const AdminLayout = () => {
 
             {/* Sidebar */}
             <div
-                className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-300 ease-in-out`}
+                className={`fixed inset-y-0 left-0 z-40 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-300 ease-in-out`}
             >
                 {/* Logo */}
                 <div className="flex items-center justify-between h-16 px-6 border-b">
@@ -41,7 +92,7 @@ const AdminLayout = () => {
                         <div className="w-8 h-8 bg-indigo-600 rounded-md flex items-center justify-center text-white font-bold">
                             N
                         </div>
-                        <span className="ml-2 text-xl font-bold text-gray-800">NexusDesk</span>
+                        <span className="ml-2 text-xl font-bold text-gray-800">SpaceShift</span>
                     </div>
                     <button onClick={() => setSidebarOpen(false)} className="md:hidden text-gray-500">
                         <X className="h-6 w-6" />
@@ -99,7 +150,7 @@ const AdminLayout = () => {
                             <p className="text-sm font-medium text-gray-700">Admin User</p>
                             <p className="text-xs text-gray-500">admin@example.com</p>
                         </div>
-                        <button className="ml-auto text-gray-400 hover:text-gray-500">
+                        <button onClick={() => setShowLogoutModal(true)} className="ml-auto text-gray-400 hover:text-gray-500">
                             <LogOut className="h-5 w-5" />
                         </button>
                     </div>
@@ -143,7 +194,9 @@ const AdminLayout = () => {
                                 <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-medium">
                                     A
                                 </div>
-                                <ChevronDown className="h-4 w-4 ml-1 text-gray-500 hidden md:block" />
+                                <button onClick={() => setShowLogoutModal(true)} className="ml-auto text-gray-400 hover:text-gray-500">
+                                <LogOut  className="h-4 w-4 ml-1 text-gray-500 hidden md:block" />
+                                </button>
                             </div>
                         </div>
                     </div>

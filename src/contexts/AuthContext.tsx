@@ -81,11 +81,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             }
         } catch (error) {
             if (error instanceof AxiosError) {
+         
                 toast.error(error.response?.data?.message ?? "Login failed");
             } else {
                 toast.error("Login failed");
             }
-            setLoginLoading(true);
+            setLoginLoading(false);
         } 
         return null;
     };

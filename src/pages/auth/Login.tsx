@@ -17,16 +17,12 @@ const Login = () => {
         e.preventDefault();
         const response = await login(inputs.email.value, inputs.password.value);
 
-        if (!response) {
-            toast.error("Something went wrong, please try again");
-            return;
-        }
+        if (!response) return;
 
-        console.log("Login Response:", response); // ✅ Debugging
 
-        if (response.system_role === "admin") {
+        if (response?.system_role === "admin") {
             window.location.href = "/admin";
-        } else if (response.system_role === "agent") {
+        } else if (response?.system_role === "agent") {
             window.location.href = "/agent";
         } else {
             toast.error("Invalid role received");

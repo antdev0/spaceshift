@@ -28,7 +28,7 @@ type InputState<T extends string> = Record<T, { value: string; error: string | n
 
     const [inputs, setInputs] = useState(initialState);
 
-    const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>) => {
         const { name, value } = e.target;
         if (!(name in fields)) return; // Ensure name exists in fields
 

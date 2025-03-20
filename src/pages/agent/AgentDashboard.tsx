@@ -34,7 +34,8 @@ interface StatisticsProps {
 }
 
 const AgentDashboard = () => {
-    const { user, loading } = useAuthContext();
+    const { user, loading, logout, logoutLoading } = useAuthContext();
+    const [showLogoutModal, setShowLogoutModal] = useState(false)
 
 
 
@@ -275,6 +276,55 @@ const AgentDashboard = () => {
     if (loading) return <p>Loading...</p>;
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50">
+            {
+                showLogoutModal && (
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+
+                    >
+                        <div
+                            className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-300"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            {/* Header */}
+                            <div className="p-6 border-b flex justify-between items-center">
+                                <h3 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+                                    <LogOut className="h-5 w-5 text-indigo-600" />
+                                    Confirm
+                                </h3>
+                                <button onClick={() => setShowLogoutModal(false)} className="p-2 rounded-full hover:bg-gray-100 transition-colors" aria-label="Close">
+                                    <X size={20} />
+                                </button>
+                            </div>
+
+                            {/* Content */}
+                            <div className="p-6">
+                                <p className="text-gray-600">Are you sure you want to logout?</p>
+                            </div>
+
+                            {/* Footer */}
+                            <div className="px-6 py-4 bg-gray-50 border-t flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowLogoutModal(false)}
+                                    className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 font-medium transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => logout()}
+                                    disabled={logoutLoading}
+                                    className="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors flex items-center gap-2"
+                                >
+                                    <LogOut className="h-4 w-4" />
+                                    {logoutLoading ? "Logging out..." : "Logout"}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
             {/* Navbar */}
             <nav className="bg-white border-b border-gray-200 fixed w-full z-30 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -331,7 +381,7 @@ const AgentDashboard = () => {
                                 <span className="text-sm font-medium text-gray-700">{user?.first_name} {user?.last_name}</span>
                             </div>
 
-                            <button className="p-1 rounded-full text-gray-400 hover:text-gray-500">
+                            <button onClick={() => setShowLogoutModal(true)} className="p-1 rounded-full text-gray-400 hover:text-gray-500">
                                 <LogOut size={20} />
                             </button>
                         </div>
