@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import AdminLayout from "@layouts/AdminLayout";
 import AgentLayout from "@layouts/AgentLayout";
-import PrivateRoutes from "@layouts/PirvateRoutes";
+import PrivateRoutes from "@layouts/PrivateRoutes";
 const Login = lazy(() => import("@pages/auth/Login"));
 const AgentDashboard = lazy(() => import("@pages/agent/AgentDashboard"));
 

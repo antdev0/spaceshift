@@ -1,5 +1,7 @@
 // import { ArrowUpRight, ArrowDownRight } from "lucide-react"
 
+import PageHeader from "@features/admin/components/PageHeader";
+
 
 const Dashboard = () => {
     // Sample data
@@ -35,10 +37,7 @@ const Dashboard = () => {
     return (
         <div className="max-w-7xl mx-auto">
             {/* Page header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-                <p className="mt-1 text-sm text-gray-500">Overview of your BPO agent management system</p>
-            </div>
+            <PageHeader title="Admin Dashboard" description="Overview of your BPO agent management system" />
 
             {/* Stats */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
